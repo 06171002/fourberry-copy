@@ -17,15 +17,7 @@ onMounted(() => {
   const tl = gsap.timeline();
 
   // 3. 타임라인에 모든 애니메이션을 순차적으로 추가
-  tl.to('.preloader', { // 1. 흰색 로딩 화면 사라지기
-    duration: 0.8,
-    opacity: 0,
-    onComplete: () => {
-      // 애니메이션이 끝나면 preloader를 DOM에서 제거하거나 숨깁니다.
-      document.querySelector('.preloader')?.setAttribute('style', 'display: none');
-    }
-  })
-      .to(".hero-content h1", { // 2. 슬로건 나타나기
+  tl.to(".hero-content h1", { // 2. 슬로건 나타나기
         duration: 1.2,
         y: 0,
         autoAlpha: 1,

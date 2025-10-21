@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, nextTick, computed, watch, onBeforeMount }
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+import { useHeaderVisibility } from '~/composables/useHeaderState'
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
@@ -19,6 +20,7 @@ const projects = ref([
 ]);
 const activeProjectId = ref(projects.value[0]?.id || '')
 let triggers: ScrollTrigger[] = [];
+const isHeaderHidden = useHeaderVisibility()
 
 // --- ✨ 현재 활성화된 프로젝트 객체를 찾는 computed 속성 ---
 const activeProject = computed(() => {
@@ -58,9 +60,9 @@ onMounted(async () => {
       triggers.push(trigger);
     }
 
-    gsap.from(el.querySelector('.detail-content'), {
-      opacity: 0,
-      y: 50,
+    gsap.to(el.querySelector('.detail-content'), {
+      opacity: 1,
+      y: 0,
       duration: 0.6,
       ease: 'power2.out',
       scrollTrigger: {
@@ -172,7 +174,8 @@ onUnmounted(() => {
 /* --- 왼쪽 제목 목록 --- */
 .project-titles {
   position: sticky;
-  top: 120px;
+  top: var(--header-height);
+  transition: top 0.4s ease-out;
   /* max-height 제거 */
   height: fit-content; /* 내용 높이에 맞춤 */
   align-self: start;
@@ -252,7 +255,9 @@ onUnmounted(() => {
 
 
 .detail-content {
-  /* 내용 스타일 */
+  /* ✨ GSAP의 "from" 상태와 동일하게 CSS에서 미리 설정 */
+  opacity: 0;
+  transform: translateY(50px);
 }
 
 .detail-content h2 {
