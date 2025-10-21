@@ -3,9 +3,12 @@ import { ref, onMounted, onUnmounted, nextTick, computed, watch, onBeforeMount }
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
-import { useHeaderVisibility } from '~/composables/useHeaderState'
+import { useHeaderVisibility } from '../composables/useHeaderState'
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
+
+const isHeaderHidden = useHeaderVisibility() // 헤더 상태 가져오기
+let headerScrollTrigger: ScrollTrigger | null = null;
 
 const projects = ref([
   // ... 프로젝트 데이터 ...
@@ -20,7 +23,6 @@ const projects = ref([
 ]);
 const activeProjectId = ref(projects.value[0]?.id || '')
 let triggers: ScrollTrigger[] = [];
-const isHeaderHidden = useHeaderVisibility()
 
 // --- ✨ 현재 활성화된 프로젝트 객체를 찾는 computed 속성 ---
 const activeProject = computed(() => {
@@ -60,9 +62,9 @@ onMounted(async () => {
       triggers.push(trigger);
     }
 
-    gsap.to(el.querySelector('.detail-content'), {
-      opacity: 1,
-      y: 0,
+    gsap.from(el.querySelector('.detail-content'), {
+      opacity: 0,
+      y: 50,
       duration: 0.6,
       ease: 'power2.out',
       scrollTrigger: {
@@ -76,6 +78,24 @@ onMounted(async () => {
   if (projects.value.length > 0) {
     activeProjectId.value = projects.value[0].id;
   }
+
+  headerScrollTrigger = ScrollTrigger.create({
+    trigger: 'body',
+    start: 'top top',
+    end: 'bottom top',
+    onUpdate: self => {
+      const currentScrollY = self.scroll();
+
+      // 스크롤이 100px 미만이거나 스크롤을 올릴 때(direction: -1) 헤더 표시
+      if (currentScrollY < 100 || self.direction === -1) {
+        isHeaderHidden.value = false;
+      }
+      // 스크롤을 내릴 때(direction: 1) 헤더 숨김
+      else if (self.direction === 1) {
+        isHeaderHidden.value = true;
+      }
+    },
+  });
 });
 
 onUnmounted(() => {
@@ -174,8 +194,7 @@ onUnmounted(() => {
 /* --- 왼쪽 제목 목록 --- */
 .project-titles {
   position: sticky;
-  top: var(--header-height);
-  transition: top 0.4s ease-out;
+  top: 120px;
   /* max-height 제거 */
   height: fit-content; /* 내용 높이에 맞춤 */
   align-self: start;
@@ -255,9 +274,7 @@ onUnmounted(() => {
 
 
 .detail-content {
-  /* ✨ GSAP의 "from" 상태와 동일하게 CSS에서 미리 설정 */
-  opacity: 0;
-  transform: translateY(50px);
+  /* 내용 스타일 */
 }
 
 .detail-content h2 {

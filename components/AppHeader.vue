@@ -1,5 +1,5 @@
 <template>
-  <header class="header" :class="{ 'header-scrolled': isScrolled }">
+  <header class="header" :class="{ 'header-scrolled': shouldApplyScrolledClass, 'header-hidden': isHeaderHidden }">
     <div class="container">
       <NuxtLink to="/" class="logo">FOURBERRY</NuxtLink>
       <nav class="navigation">
@@ -19,12 +19,14 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { onUnmounted } from 'vue'
 import { watch } from 'vue'
+import { useHeaderVisibility } from '~/composables/useHeaderState'
 
 gsap.registerPlugin(ScrollTrigger)
 
 // 스크롤 상태를 저장할 ref 변수
 const isScrolled = ref(false)
 const route = useRoute()
+const isHeaderHidden = useHeaderVisibility()
 
 const isHomePage = computed(() => route.path === '/')
 
@@ -52,6 +54,7 @@ onMounted(() => {
 
   // 라우트 변경 감지 (페이지 이동 시)
   watch(() => route.path, (newPath) => {
+    isHeaderHidden.value = false;
     if (newPath === '/') {
       // 메인 페이지로 돌아오면 스크롤 상태 초기화 및 트리거 재활성화 (필요 시)
       isScrolled.value = window.scrollY > 10; // 현재 스크롤 위치 반영
@@ -142,5 +145,8 @@ onUnmounted(() => {
 /* (선택) 호버 효과 추가 */
 .navigation a:hover {
   opacity: 0.8;
+}
+.header.header-hidden {
+  transform: translateY(-100%);
 }
 </style>
