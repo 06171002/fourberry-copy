@@ -55,22 +55,6 @@ onMounted(() => {
       }, "-=1.5");; // 바로 앞 애니메이션(subtitle) 시작 0.2초 후에 시작
 
 
-  // --- 이하 스크롤 트리거 애니메이션 (기존과 동일) ---
-  gsap.utils.toArray('.section-title, .content-section h2, .cta-section h2').forEach(elem => {
-    // ... (이하 스크롤 애니메이션 코드는 그대로 유지)
-    const el = elem as HTMLElement;
-    gsap.from(el, {
-      y: 50,
-      opacity: 0,
-      duration: 0.8,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: el,
-        start: 'top 85%',
-      }
-    });
-  });
-
   gsap.utils.toArray('.area-card').forEach((card, index) => {
     const el = card as HTMLElement;
     gsap.from(el, {
@@ -98,6 +82,112 @@ onMounted(() => {
         start: 'top 88%',
       }
     });
+  });
+
+  gsap.utils.toArray('.content-section, .cta-section').forEach((section, i) => {
+    const el = section as HTMLElement;
+    const bgColor = i % 2 === 0 ? '#ffffff' : '#f8f9fa'; // 섹션마다 번갈아 다른 배경색 지정
+
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 50%', // 섹션의 중간 지점이 화면 중앙에 왔을 때
+      end: 'bottom 50%', // 섹션의 중간 지점이 화면 중앙에서 벗어날 때
+      onEnter: () => gsap.to('body', { backgroundColor: bgColor, duration: 1 }),
+      onEnterBack: () => gsap.to('body', { backgroundColor: bgColor, duration: 1 }),
+    });
+  });
+
+  gsap.from(".solution-cards .card", {
+    duration: 1,
+    opacity: 0,
+    x: (index) => (index % 2 === 0 ? -100 : 100), // 짝수 왼쪽, 홀수 오른쪽
+    stagger: 0.3, // 0.3초 간격
+    ease: 'power4.out',
+    scrollTrigger: {
+      trigger: ".solution-cards", // 컨테이너 기준
+      start: "top 80%",
+      once: true
+    }
+  });
+
+  gsap.utils.toArray('.section-title, .content-section h2, .cta-section h2').forEach(elem => {
+    const el = elem as HTMLElement;
+    // 각 제목 텍스트를 span으로 감싸줍니다.
+    el.innerHTML = `<span class="reveal-text">${el.textContent}</span>`;
+
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 85%',
+      onEnter: () => el.classList.add('reveal-active'), // 화면에 보이면 클래스 추가
+      // onLeaveBack: () => el.classList.remove('reveal-active'), // 화면에서 벗어나면 클래스 제거 (선택 사항)
+      once: true // 한 번만 실행
+    });
+  });
+
+  gsap.utils.toArray('.area-card').forEach((card, index) => {
+    const el = card as HTMLElement;
+
+    // 1. Stagger 등장 애니메이션 (delay 사용)
+    gsap.from(el, {
+      duration: 0.8,
+      opacity: 0,
+      y: 50,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: ".business-areas",
+        start: "top 85%",
+        once: true,
+        // 👇 내부 요소 애니메이션을 위한 콜백 추가
+        onEnter: () => {
+          // 카드가 보이기 시작하면 내부 요소 애니메이션 실행
+          gsap.from(el.querySelectorAll('h3, p'), { // 카드 내부의 h3와 p 선택
+            duration: 0.6,
+            opacity: 0,
+            y: 20,
+            stagger: 0.15, // 제목과 내용이 0.15초 간격으로 나타남
+            delay: 0.2, // 카드가 나타나고 0.2초 후에 시작
+            ease: 'power2.out'
+          });
+        },
+      },
+      delay: index * 0.2
+    });
+
+    // 2. 스크롤에 따른 크기/투명도 조절 애니메이션
+    gsap.to(el, {
+      scale: 0.95,
+      opacity: 0.7,
+      rotationZ: index % 2 === 0 ? -2 : 2, // 짝수 카드는 왼쪽, 홀수 카드는 오른쪽으로 살짝 회전
+      ease: 'none',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top center',
+        end: 'bottom center',
+        scrub: 1.5 // 스크럽 속도를 조절하여 부드럽게
+      }
+    });
+  });
+
+  gsap.utils.toArray('.content-section.full-screen').forEach(section => {
+    const el = section as HTMLElement;
+    const description = el.querySelector('.section-description.large');
+
+    if (description) {
+      gsap.fromTo(description,
+          { x: -100, opacity: 0 }, // 시작 상태: 왼쪽 밖, 투명
+          {
+            x: 0, // 최종 상태: 원래 위치
+            opacity: 1, // 최종 상태: 불투명
+            ease: 'none',
+            scrollTrigger: {
+              trigger: el,
+              start: 'top center+=100', // 섹션 상단이 화면 중앙보다 조금 아래에 왔을 때 시작
+              end: 'center center', // 섹션 중앙이 화면 중앙에 왔을 때 종료
+              scrub: 1.5 // 스크롤 속도보다 약간 느리게 반응
+            }
+          }
+      );
+    }
   });
 });
 </script>
@@ -394,6 +484,22 @@ onMounted(() => {
 
 .contact-button:hover {
   transform: scale(1.05);
+}
+
+.section-title, .content-section h2, .cta-section h2 {
+  overflow: hidden; /* 자식 요소가 넘치지 않도록 */
+}
+
+.reveal-text {
+  display: block; /* 줄 단위 애니메이션을 위해 block으로 변경 */
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.8s ease-out, opacity 0.8s ease-out; /* CSS 트랜지션 추가 */
+}
+
+.reveal-active .reveal-text {
+  transform: translateY(0);
+  opacity: 1;
 }
 
 /* ============== 반응형 스타일 ============== */

@@ -1,34 +1,99 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed, watch, onBeforeMount } from 'vue' // computed 추가
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 
-gsap.registerPlugin(ScrollTrigger)
+let isClient = ref(false)
 
-onMounted(() => {
-  // .horizontal-container 요소를 HTMLElement 타입으로 찾아서 변수에 저장합니다.
-  const horizontalContainer = document.querySelector('.horizontal-container') as HTMLElement
-
-  // 만약 요소를 찾지 못했다면, 애니메이션을 실행하지 않고 함수를 종료합니다.
-  if (!horizontalContainer) {
-    return
+onBeforeMount(() => {
+  // 컴포넌트 마운트 *전* (클라이언트 측에서) isClient 값을 설정
+  isClient.value = typeof window !== 'undefined';
+  if (isClient.value) {
+    // 클라이언트 환경일 때만 GSAP 플러그인 등록
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
   }
-
-  const panels = gsap.utils.toArray('.project-panel')
-
-  gsap.to(panels, {
-    xPercent: -100 * (panels.length - 1),
-    ease: 'none',
-    scrollTrigger: {
-      trigger: horizontalContainer, // 변수를 사용합니다.
-      pin: true,
-      scrub: 1,
-      snap: 1 / (panels.length - 1),
-      // 👇 더 안전하고 명확하게 offsetWidth를 사용합니다.
-      end: () => '+=' + horizontalContainer.offsetWidth,
-    },
-  })
 })
+
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
+
+const projects = ref([
+  // ... 프로젝트 데이터 ...
+  { id: 'cuckoo-oms', title: '쿠쿠 통합 쇼핑몰 관리 (OMS)', description: '78개 영업채널의 주문, 배송, 재고 관리를 위한 차세대 시스템', period: '2021.11 ~ 2022.09 (구축) / 2025.01 ~ 현재 (운영)', image: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDN8fG9yZGVyJTIwbWFuYWdlbWVudHxlbnwwfHx8fDE2NzgwNjQ0MDU&ixlib=rb-4.0.3&q=80&w=1080' },
+  { id: 'cuckoo-pos', title: '쿠쿠 차세대 영업관리 (POS & WEB)', description: '판매, 정산, 재고, 매출, 고객 정보 등 유통 관점의 실시간 데이터 관리 시스템', period: '2019.05 ~ 2019.12 (구축) / 2025.01 ~ 현재 (운영)', image: 'https://images.unsplash.com/photo-1587691592099-f4d15f0892de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDEyfHxwb3MlMjBzeXN0ZW18ZW58MHx8fHwxNjc4MDY0NDYx&ixlib=rb-4.0.3&q=80&w=1080' },
+  { id: 'nonghyup-mall', title: '영등포농협 브랜드 쇼핑몰', description: '하이브리드 모바일 쇼핑몰, 관리자 사이트, 관리자 앱 시스템 (Always withFresh)', period: '2024.01 ~ 2025.03 (구축) / 2025.04 ~ 현재 (운영)', image: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDF8fGdyb2NlcnklMjBzdG9yZXxlbnwwfHx8fDE2NzgwNjQ1MDI&ixlib=rb-4.0.3&q=80&w=1080' },
+  { id: 'nonghyup-sso', title: '영등포농협 SSO 시스템', description: '온라인몰 포함 3개 사이트 통합 회원 관리를 위한 SSO 시스템 (소셜 인증 포함)', period: '2024.08 ~ 2024.12 (구축)', image: 'https://images.unsplash.com/photo-1554629947-334ff61d85dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDEwfHxsYW5kc2NhcGV8ZW58MHx8fHwxNjc4MDY0NTMw&ixlib.rb-4.0.3&q=80&w=1080' },
+  { id: 'dhlottery', title: '동행복권 인쇄복권 DB 전환', description: '이원화된 시스템 통합 및 안정성 확보를 위한 DB 전환 (MySql to Oracle)', period: '2024.10 ~ 현재 (2025년 10월 전환 예정)', image: 'https://images.unsplash.com/photo-1518186285587-e21e49e921d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDJ8fGxvYWR8ZW58MHx8fHwxNjc4MDY0NTYy&ixlib=rb-4.0.3&q=80&w=1080' },
+  { id: 'autocrypt', title: '아우토크립트 K-CSMS', description: '자동차 보안 취약점 정보 제공 커뮤니티 사이트', period: '1차: 2024.06 ~ 2024.10 / 2차: 2025.06 ~ 2025.09 (구축)', image: 'https://images.unsplash.com/photo-1487058792275-054922ca9c5e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDV8fHNlY3VyaXR5fGVufDB8fHx8MTY3ODA2NDU5MQ&ixlib=rb-4.0.3&q=80&w=1080' },
+  { id: 'hyundai', title: '현대자동차 차량출입관제', description: '실시간 차량 출입 집계 및 관리를 통한 작업자 안전 및 보안 관리 향상', period: '2020.07 ~ 2020.10 (구축)', image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDEwfHxjYXJ8ZW58MHx8fHwxNjc4MDY0NjIx&ixlib=rb-4.0.3&q=80&w=1080' },
+  { id: 'etas', title: 'eTAS 운행기록분석시스템', description: '노후 장비 교체, 실시간 DTG 수집체계 구축 및 정보 컨설팅', period: '2020.06 ~ 2020.12 (구축)', image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDF8fGJ1c3xlbnwwfHx8fDE2NzgwNjQ2NDk&ixlib=rb-4.0.3&q=80&w=1080' },
+]);
+const activeProjectId = ref(projects.value[0]?.id || '')
+let triggers: ScrollTrigger[] = [];
+
+// --- ✨ 현재 활성화된 프로젝트 객체를 찾는 computed 속성 ---
+const activeProject = computed(() => {
+  return projects.value.find(p => p.id === activeProjectId.value);
+});
+
+// 스크롤 이동 메소드
+const scrollToProject = (projectId: string) => {
+  // 클릭 시 activeProjectId 즉시 변경 (선택 사항, 더 빠른 반응성)
+  // activeProjectId.value = projectId;
+  gsap.to(window, {
+    duration: 1,
+    scrollTo: { y: `#${projectId}`, offsetY: 100 },
+    ease: 'power2.inOut'
+  });
+}
+
+// ❗️ scrollToActiveTitle 함수는 더 이상 필요 없으므로 제거
+
+onMounted(async () => {
+  if (!isClient.value) return;
+  await nextTick();
+  const sections = gsap.utils.toArray('.project-detail-section');
+
+  sections.forEach((section) => {
+    const el = section as HTMLElement;
+    const projectId = el.dataset.projectId;
+
+    if (projectId) {
+      const trigger = ScrollTrigger.create({
+        trigger: el,
+        start: 'top center+=50',
+        end: 'bottom center-=50',
+        // markers: true,
+        onEnter: () => { activeProjectId.value = projectId; },
+        onEnterBack: () => { activeProjectId.value = projectId; },
+      });
+      triggers.push(trigger);
+    }
+
+    gsap.from(el.querySelector('.detail-content'), {
+      opacity: 0,
+      y: 50,
+      duration: 0.6,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 80%',
+        toggleActions: 'play none none reverse',
+      }
+    });
+  });
+
+  if (projects.value.length > 0) {
+    activeProjectId.value = projects.value[0].id;
+  }
+});
+
+onUnmounted(() => {
+  if (isClient.value) {
+    triggers.forEach(trigger => trigger.kill());
+    // ScrollTrigger.getAll().forEach(st => st.kill()); // 더 확실한 방법
+  }
+});
 </script>
 
 <template>
@@ -38,89 +103,260 @@ onMounted(() => {
       <p>포베리가 성공적으로 수행한 시스템 통합 및 유지보수 프로젝트들입니다.</p>
     </section>
 
-    <div class="horizontal-container">
-      <div class="project-panel project-cuckoo">
-        <div class="panel-content">
-          <h2>쿠쿠 통합 시스템 구축</h2>
-          <p>78개 영업채널의 주문, 배송, 재고를 관리하는 차세대 시스템</p>
-        </div>
-      </div>
-      <div class="project-panel project-nonghyup">
-        <div class="panel-content">
-          <h2>영등포농협 브랜드몰 & SSO</h2>
-          <p>온라인 브랜드몰과 통합 인증(SSO) 시스템</p>
-        </div>
-      </div>
-      <div class="project-panel project-autocrypt">
-        <div class="panel-content">
-          <h2>아우토크립트 자동차 보안 시스템</h2>
-          <p>자동차 보안 취약점 정보 제공을 위한 K-CSMS 커뮤니티</p>
-        </div>
-      </div>
-      <div class="project-panel project-dhlottery">
-        <div class="panel-content">
-          <h2>동행복권 인쇄복권 시스템</h2>
-          <p>이원화된 인쇄복권 시스템 통합 및 DB 전환</p>
-        </div>
-      </div>
-    </div>
+    <ClientOnly>
+      <div class="main-content-area">
+        <aside class="project-titles">
+          <Transition name="fade" mode="out-in">
+            <div :key="activeProject?.id" class="active-title-wrapper">
+              <h3 v-if="activeProject">{{ activeProject.title }}</h3>
+            </div>
+          </Transition>
+          <ul style="display: none;">
+            <li v-for="project in projects" :key="project.id">
+              <a :href="`#${project.id}`" @click.prevent="scrollToProject(project.id)">
+                {{ project.title }}
+              </a>
+            </li>
+          </ul>
+        </aside>
 
-    <section class="outro-section">
-      <h2>더 많은 프로젝트가 궁금하신가요?</h2>
-      <button>문의하기</button>
-    </section>
+        <main class="project-details">
+          <section
+              v-for="project in projects"
+              :key="project.id"
+              :id="project.id"
+              class="project-detail-section"
+              :data-project-id="project.id"
+          >
+            <div class="detail-content">
+              <h2>{{ project.title }}</h2>
+              <p>{{ project.description }}</p>
+              <span class="period">{{ project.period }}</span>
+              <img :src="project.image" :alt="`${project.title} image`" loading="lazy">
+            </div>
+          </section>
+        </main>
+      </div>
+
+      <template #fallback>
+        <div style="text-align: center; padding: 5rem 0; min-height: 50vh;">
+          프로젝트 목록을 불러오는 중입니다...
+        </div>
+      </template>
+    </ClientOnly> <section class="outro-section">
+    <h2>더 많은 프로젝트가 궁금하신가요?</h2>
+    <NuxtLink to="/contact" class="contact-button">문의하기</NuxtLink>
+  </section>
   </div>
 </template>
 
 <style scoped>
 .projects-page {
-  background-color: #007aff;
-  color: #fff;
+  background-color: #ffffff;
+  color: #333;
 }
 
 .intro-section,
 .outro-section {
-  padding: 8rem 2rem;
+  padding: 6rem 2rem;
   text-align: center;
+  background-color: #f8f9fa;
+}
+.intro-section h1 { font-size: 2.8rem; margin-bottom: 0.5rem; }
+.intro-section p { font-size: 1.1rem; color: #555; }
+.outro-section h2 { font-size: 2rem; margin-bottom: 1.5rem; }
+.contact-button { /* 스타일은 이전과 동일 */
+  display: inline-block;
+  background-color: #007aff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 1rem 2.5rem;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 700;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.contact-button:hover { transform: scale(1.05); background-color: #0056b3; }
+
+
+/* --- 메인 콘텐츠 영역 --- */
+.main-content-area {
+  display: grid;
+  grid-template-columns: 300px 1fr; /* 왼쪽 너비 고정, 오른쪽 나머지 */
+  gap: 4rem; /* 컬럼 사이 간격 */
+  max-width: 1400px; /* 전체 최대 너비 */
+  margin: 0 auto;
+  padding: 4rem 2rem;
 }
 
-/* 가로 스크롤 전체를 감싸는 컨테이너 */
-.horizontal-container {
-  display: flex;
-  flex-wrap: nowrap; /* 절대 줄바꿈되지 않도록 설정 */
-  width: 400%; /* 패널 4개의 너비만큼 설정 */
+/* --- 왼쪽 제목 목록 --- */
+.project-titles {
+  position: sticky;
+  top: 120px;
+  /* max-height 제거 */
+  height: fit-content; /* 내용 높이에 맞춤 */
+  align-self: start;
+  /* overflow 제거 */
+  text-align: left; /* 텍스트 왼쪽 정렬 */
+  padding: 1rem 0; /* 상하 여백 */
 }
 
-/* 각 프로젝트 패널(카드) 스타일 */
-.project-panel {
-  width: 100vw; /* 화면 너비만큼 꽉 채움 */
-  height: 100vh; /* 화면 높이만큼 꽉 채움 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-size: cover;
-  background-position: center;
-  position: relative;
+.project-titles h3 {
+  font-size: 1.8rem; /* 제목 크기 키움 */
+  font-weight: 700;
+  color: #007aff; /* 활성 색상 */
+  margin: 0; /* 기본 마진 제거 */
+  line-height: 1.4;
 }
 
-.panel-content {
-  text-align: center;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 2rem;
-  border-radius: 12px;
+.project-titles ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 100%; /* 부모 높이만큼 */
+  overflow-y: auto; /* 세로 스크롤 활성화 */
+  /* 스크롤바 디자인 (선택 사항) */
+  scrollbar-width: thin;
+  scrollbar-color: #007aff #f8f9fa;
+}
+/* Webkit 브라우저 스크롤바 */
+.project-titles ul::-webkit-scrollbar {
+  width: 6px;
+}
+.project-titles ul::-webkit-scrollbar-track {
+  background: #f8f9fa;
+  border-radius: 3px;
+}
+.project-titles ul::-webkit-scrollbar-thumb {
+  background-color: #007aff;
+  border-radius: 3px;
 }
 
-/* 각 패널에 다른 배경 이미지 설정 */
-.project-cuckoo {
-  background-color: #eaeaea;
+.project-titles li {
+  margin-bottom: 0; /* 아래쪽 마진 제거 */
 }
-.project-nonghyup {
-  background-image: url('@/assets/image/feature_1.svg');
+
+.project-titles a {
+  text-decoration: none;
+  color: #888;
+  font-weight: 500;
+  font-size: 1.1rem;
+  transition: color 0.3s ease, font-weight 0.3s ease, background-color 0.3s ease, padding 0.3s ease; /* transition 추가 */
+  display: block;
+  padding: 1rem 1.5rem; /* 패딩 추가 */
+  border-left: 3px solid transparent; /* 비활성 상태 테두리 */
 }
-.project-autocrypt {
-  background-image: url('@/assets/image/feature_1.svg');
+
+.project-titles a.active {
+  color: #007aff;
+  font-weight: 700;
+  background-color: #e9ecef; /* 활성 배경색 */
+  border-left-color: #007aff; /* 활성 테두리 */
 }
-.project-dhlottery {
-  background-image: url('@/assets/image/feature_1.svg'); /* 이 이미지는 추가로 준비해야 합니다. */
+.project-titles a:hover {
+  color: #333;
+  background-color: #f8f9fa; /* 호버 배경색 */
+}
+
+/* --- 오른쪽 상세 내용 --- */
+.project-detail-section {
+  min-height: 90vh; /* 높이를 조금 더 늘려 겹침 방지 */
+  margin-bottom: 5rem; /* 간격 살짝 줄임 */
+  padding-top: 150px; /* 상단 여백 조금 더 확보 */
+  box-sizing: border-box;
+}
+.project-detail-section:last-child {
+  margin-bottom: 0;
+  min-height: calc(90vh - 150px);
+}
+
+
+.detail-content {
+  /* 내용 스타일 */
+}
+
+.detail-content h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.detail-content p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #555;
+  margin-bottom: 1rem;
+}
+
+.detail-content .period {
+  display: block;
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 2.5rem;
+}
+
+.detail-content img {
+  width: 100%;
+  max-width: 800px; /* 이미지 최대 너비 */
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem; /* 이미지 위쪽 여백 */
+  display: block; /* margin auto 적용 위해 */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 반응형 스타일 */
+@media (max-width: 992px) {
+  .main-content-area {
+    grid-template-columns: 1fr; /* 모바일에서는 세로로 쌓임 */
+    gap: 2rem;
+  }
+  .project-titles {
+    position: static; /* sticky 해제 */
+    margin-bottom: 3rem;
+    padding-bottom: 0;
+    text-align: center; /* 모바일에선 중앙 정렬 */
+  }
+  .project-titles ul {
+    max-height: none;
+    overflow-x: auto; /* 가로 스크롤 */
+    overflow-y: hidden; /* 세로 스크롤 숨김 */
+    display: flex;
+    padding-bottom: 1rem;
+    white-space: nowrap;
+    border-bottom: 1px solid #eee; /* 구분선 */
+  }
+  .project-titles li {
+    margin-right: 0;
+  }
+  .project-titles a {
+    padding: 0.8rem 1rem;
+    border-left: none; /* 왼쪽 테두리 제거 */
+    border-bottom: 3px solid transparent; /* 하단 테두리 준비 */
+  }
+  .project-titles a.active {
+    background-color: transparent; /* 활성 배경색 제거 */
+    border-left-color: transparent;
+    border-bottom-color: #007aff; /* 활성 하단 테두리 */
+  }
+  .project-titles a:hover {
+    background-color: #f8f9fa;
+  }
+  .project-detail-section {
+    min-height: auto;
+    margin-bottom: 6rem;
+    padding-top: 0; /* 모바일에서는 필요 없음 */
+  }
+  .project-titles h3 {
+    font-size: 1.5rem; /* 모바일 제목 크기 조정 */
+  }
+  .project-detail-section {
+    min-height: auto;
+    margin-bottom: 6rem;
+    padding-top: 0;
+  }
 }
 </style>
