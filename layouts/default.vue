@@ -2,14 +2,11 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { useHeaderVisibility } from '../composables/useHeaderState'
 
 gsap.registerPlugin(ScrollTrigger)
 // 로딩 상태 ref (초기값 true)
 const isLoading = ref(true)
 const isLoaderHidden = ref(false)
-const isHeaderHidden = useHeaderVisibility()
-let scrollTriggerInstance: ScrollTrigger | null = null
 
 onMounted(() => {
   // 클라이언트 측에서 컴포넌트가 마운트된 후 (하이드레이션 완료 후) 실행
@@ -20,25 +17,8 @@ onMounted(() => {
   setTimeout(() => {
     isLoaderHidden.value = true;
   }, 800);
-
-  scrollTriggerInstance = ScrollTrigger.create({
-    start: "top top", // 스크롤이 맨 위에서 시작할 때부터 감지
-    end: "max",       // 스크롤 끝까지 감지
-    onUpdate: (self) => {
-      const currentScroll = self.scroll()
-      // 120px(헤더 높이) 이상 스크롤했고, 방향이 '아래(1)'일 때
-      if (currentScroll > 120 && self.direction === 1) {
-        isHeaderHidden.value = true // 숨기기
-      } else if (self.direction === -1) { // 방향이 '위(-1)'일 때
-        isHeaderHidden.value = false // 보이기
-      }
-    }
-  })
 })
 
-onUnmounted(() => {
-  scrollTriggerInstance?.kill() // 컴포넌트 파괴 시 ScrollTrigger 정리
-})
 </script>
 
 <template>
