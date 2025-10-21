@@ -4,17 +4,6 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 
-let isClient = ref(false)
-
-onBeforeMount(() => {
-  // 컴포넌트 마운트 *전* (클라이언트 측에서) isClient 값을 설정
-  isClient.value = typeof window !== 'undefined';
-  if (isClient.value) {
-    // 클라이언트 환경일 때만 GSAP 플러그인 등록
-    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
-  }
-})
-
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 const projects = ref([
@@ -50,7 +39,6 @@ const scrollToProject = (projectId: string) => {
 // ❗️ scrollToActiveTitle 함수는 더 이상 필요 없으므로 제거
 
 onMounted(async () => {
-  if (!isClient.value) return;
   await nextTick();
   const sections = gsap.utils.toArray('.project-detail-section');
 
@@ -89,10 +77,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  if (isClient.value) {
-    triggers.forEach(trigger => trigger.kill());
-    // ScrollTrigger.getAll().forEach(st => st.kill()); // 더 확실한 방법
-  }
+  triggers.forEach(trigger => trigger.kill());
 });
 </script>
 
@@ -103,50 +88,44 @@ onUnmounted(() => {
       <p>포베리가 성공적으로 수행한 시스템 통합 및 유지보수 프로젝트들입니다.</p>
     </section>
 
-    <ClientOnly>
-      <div class="main-content-area">
-        <aside class="project-titles">
-          <Transition name="fade" mode="out-in">
-            <div :key="activeProject?.id" class="active-title-wrapper">
-              <h3 v-if="activeProject">{{ activeProject.title }}</h3>
-            </div>
-          </Transition>
-          <ul style="display: none;">
-            <li v-for="project in projects" :key="project.id">
-              <a :href="`#${project.id}`" @click.prevent="scrollToProject(project.id)">
-                {{ project.title }}
-              </a>
-            </li>
-          </ul>
-        </aside>
+    <div class="main-content-area">
+      <aside class="project-titles">
+        <Transition name="fade" mode="out-in">
+          <div :key="activeProject?.id" class="active-title-wrapper">
+            <h3 v-if="activeProject">{{ activeProject.title }}</h3>
+          </div>
+        </Transition>
+        <ul style="display: none;">
+          <li v-for="project in projects" :key="project.id">
+            <a :href="`#${project.id}`" @click.prevent="scrollToProject(project.id)">
+              {{ project.title }}
+            </a>
+          </li>
+        </ul>
+      </aside>
 
-        <main class="project-details">
-          <section
-              v-for="project in projects"
-              :key="project.id"
-              :id="project.id"
-              class="project-detail-section"
-              :data-project-id="project.id"
-          >
-            <div class="detail-content">
-              <h2>{{ project.title }}</h2>
-              <p>{{ project.description }}</p>
-              <span class="period">{{ project.period }}</span>
-              <img :src="project.image" :alt="`${project.title} image`" loading="lazy">
-            </div>
-          </section>
-        </main>
-      </div>
+      <main class="project-details">
+        <section
+            v-for="project in projects"
+            :key="project.id"
+            :id="project.id"
+            class="project-detail-section"
+            :data-project-id="project.id"
+        >
+          <div class="detail-content">
+            <h2>{{ project.title }}</h2>
+            <p>{{ project.description }}</p>
+            <span class="period">{{ project.period }}</span>
+            <img :src="project.image" :alt="`${project.title} image`" loading="lazy">
+          </div>
+        </section>
+      </main>
+    </div>
 
-      <template #fallback>
-        <div style="text-align: center; padding: 5rem 0; min-height: 50vh;">
-          프로젝트 목록을 불러오는 중입니다...
-        </div>
-      </template>
-    </ClientOnly> <section class="outro-section">
-    <h2>더 많은 프로젝트가 궁금하신가요?</h2>
-    <NuxtLink to="/contact" class="contact-button">문의하기</NuxtLink>
-  </section>
+    <section class="outro-section">
+      <h2>더 많은 프로젝트가 궁금하신가요?</h2>
+      <NuxtLink to="/contact" class="contact-button">문의하기</NuxtLink>
+    </section>
   </div>
 </template>
 
