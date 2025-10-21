@@ -100,6 +100,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   triggers.forEach(trigger => trigger.kill());
+  headerScrollTrigger?.kill();
 });
 </script>
 
@@ -112,7 +113,7 @@ onUnmounted(() => {
 
     <div class="main-content-area">
       <aside class="project-titles">
-        <Transition name="fade" mode="out-in">
+        <Transition name="fade-up" mode="out-in">
           <div :key="activeProject?.id" class="active-title-wrapper">
             <h3 v-if="activeProject">{{ activeProject.title }}</h3>
           </div>
@@ -180,6 +181,27 @@ onUnmounted(() => {
 }
 .contact-button:hover { transform: scale(1.05); background-color: #0056b3; }
 
+.fade-up-enter-active,
+.fade-up-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-up-enter-from {
+  opacity: 0;
+  transform: translateY(20px); /* 아래에서 시작 */
+}
+
+.fade-up-leave-to {
+  opacity: 0;
+  transform: translateY(-20px); /* 위로 사라짐 (선택 사항) */
+}
+
+/* (선택 사항) 제목 래퍼 높이 고정하여 레이아웃 밀림 방지 */
+.active-title-wrapper {
+  min-height: 50px; /* 제목 폰트 크기 및 줄 수에 맞게 조절 */
+  display: flex;
+  align-items: center; /* 세로 중앙 정렬 (선택 사항) */
+}
 
 /* --- 메인 콘텐츠 영역 --- */
 .main-content-area {

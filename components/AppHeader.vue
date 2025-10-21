@@ -97,7 +97,7 @@ onUnmounted(() => {
   background-color: transparent; /* 투명 배경 */
   padding: 1rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* 연한 테두리 */
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; /* color 트랜지션 추가 */
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.3s ease-in-out;
 }
 
 /* 스크롤 내렸을 때 적용될 스타일: 흰색 배경, 상단 고정 */
