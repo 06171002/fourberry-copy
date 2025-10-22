@@ -241,24 +241,23 @@ onUnmounted(() => {
 
 /* --- 메인 콘텐츠 영역 --- */
 .main-content-area {
+  display: grid;
   max-width: 1400px; /* 전체 최대 너비 */
   margin: 0 auto;
   padding: 4rem 2rem;
-  position: relative;
 }
 
 /* --- 왼쪽 제목 목록 --- */
 .project-titles {
-  position: fixed;
+  position: sticky;
   top: 50vh;
   transform: translateY(-50%);
-  /* max-height 제거 */
-  width: 300px;
-  left: calc((100vw - 1400px) / 2 + 2rem);
   z-index: 10;
   /* overflow 제거 */
   text-align: left; /* 텍스트 왼쪽 정렬 */
   padding: 1rem 0; /* 상하 여백 */
+  height: fit-content; /* 내용 높이에 맞춤 */
+  align-self: start; /* Grid 아이템을 시작점에 정렬 (매우 중요) */
 }
 
 .project-titles h3 {
