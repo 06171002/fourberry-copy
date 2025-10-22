@@ -78,12 +78,19 @@ const selectYear = (year: string) => {
             </ul>
           </aside>
           <main class="history-display">
-            <TransitionGroup name="fade-up" tag="ul" class="history-event-list">
-              <li v-for="(item, index) in filteredHistory" :key="`${selectedYear}-${item.month}-${item.title}`" class="history-event-item" :style="{'--index': index}">
-                <span class="event-date">{{ selectedYear }}.{{ item.month }}</span>
-                <p class="event-title">{{ item.title }}</p>
-              </li>
-            </TransitionGroup>
+            <Transition name="cross-fade" mode="out-in">
+              <ul class="history-event-list" :key="selectedYear">
+                <li
+                    v-for="(item, index) in filteredHistory"
+                    :key="`${selectedYear}-${item.month}-${item.title}`"
+                    class="history-event-item"
+                    :style="{'--index': index}"
+                >
+                  <span class="event-date">{{ selectedYear }}.{{ item.month }}</span>
+                  <p class="event-title">{{ item.title }}</p>
+                </li>
+              </ul>
+            </Transition>
           </main>
         </div>
       </section>
@@ -230,6 +237,8 @@ const selectYear = (year: string) => {
 /* --- 오른쪽 연혁 내용 --- */
 .history-display {
   padding-top: 10px; /* 왼쪽과 높이 맞춤 */
+  position: relative;
+  min-height: 600px;
 }
 .history-event-list {
   list-style: none;
@@ -257,22 +266,17 @@ const selectYear = (year: string) => {
 }
 
 /* --- 연혁 아이템 애니메이션 --- */
-.fade-up-enter-active,
-.fade-up-leave-active {
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-/* 순차적 애니메이션을 위해 transition-delay 추가 */
-.fade-up-enter-active {
-  /* CSS 변수 --index를 사용하여 각 아이템에 다른 딜레이 적용 */
-  transition-delay: calc(0.08s * var(--index));
+.cross-fade-enter-active,
+.cross-fade-leave-active {
+  transition: opacity 0.05s ease;
+  /* 순차 딜레이 유지 또는 제거 (선택 사항) */
+  /* transition-delay: calc(0.08s * var(--index)); */
 }
 
-.fade-up-enter-from,
-.fade-up-leave-to {
+.cross-fade-enter-from,
+.cross-fade-leave-to {
   opacity: 0;
-  transform: translateY(15px);
 }
-
 
 /* 반응형 스타일 */
 @media (max-width: 768px) {

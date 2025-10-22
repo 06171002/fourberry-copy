@@ -158,14 +158,50 @@ onUnmounted(() => {
   color: #333;
 }
 
-.intro-section,
+.intro-section {
+  /* [수정] 최소 높이를 화면 전체 높이로 변경 */
+  min-height: 100vh;
+  padding: 6rem 2rem;
+  text-align: center;
+
+  /* [추가] Flexbox를 사용해 텍스트 콘텐츠를 수직/수평 중앙 정렬 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  /* [추가] 배경 이미지 및 어두운 오버레이 */
+  background-image:
+    /* 1. 어두운 오버레이 (가독성을 위해 60% 불투명도 검은색) */
+      linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+        /* 2. 추천 이미지 URL (추상적인 기술/네트워크) */
+      url('https://images.unsplash.com/photo-1531297484001-80022131f5a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920');
+
+  background-color: #222; /* 이미지 로딩 전 배경색 */
+  background-size: cover; /* 화면에 꽉 차게 */
+  background-position: center center; /* 중앙 정렬 */
+  background-attachment: fixed; /* 스크롤 시 고정되는 패럴랙스 효과 */
+}
+
+/* [수정] 어두운 배경에 맞춰 h1 텍스트 색상 변경 */
+.intro-section h1 {
+  font-size: 2.8rem;
+  margin-bottom: 0.5rem;
+  color: #ffffff; /* 흰색 */
+}
+
+/* [수정] 어두운 배경에 맞춰 p 텍스트 색상 변경 */
+.intro-section p {
+  font-size: 1.1rem;
+  color: #f0f0f0; /* 밝은 회색 */
+}
+
 .outro-section {
   padding: 6rem 2rem;
   text-align: center;
   background-color: #f8f9fa;
+  min-height: 500px;
 }
-.intro-section h1 { font-size: 2.8rem; margin-bottom: 0.5rem; }
-.intro-section p { font-size: 1.1rem; color: #555; }
 .outro-section h2 { font-size: 2rem; margin-bottom: 1.5rem; }
 .contact-button { /* 스타일은 이전과 동일 */
   display: inline-block;
@@ -205,21 +241,21 @@ onUnmounted(() => {
 
 /* --- 메인 콘텐츠 영역 --- */
 .main-content-area {
-  display: grid;
-  grid-template-columns: 300px 1fr; /* 왼쪽 너비 고정, 오른쪽 나머지 */
-  gap: 4rem; /* 컬럼 사이 간격 */
   max-width: 1400px; /* 전체 최대 너비 */
   margin: 0 auto;
   padding: 4rem 2rem;
+  position: relative;
 }
 
 /* --- 왼쪽 제목 목록 --- */
 .project-titles {
-  position: sticky;
-  top: 120px;
+  position: fixed;
+  top: 50vh;
+  transform: translateY(-50%);
   /* max-height 제거 */
-  height: fit-content; /* 내용 높이에 맞춤 */
-  align-self: start;
+  width: 300px;
+  left: calc((100vw - 1400px) / 2 + 2rem);
+  z-index: 10;
   /* overflow 제거 */
   text-align: left; /* 텍스트 왼쪽 정렬 */
   padding: 1rem 0; /* 상하 여백 */
@@ -293,6 +329,10 @@ onUnmounted(() => {
   margin-bottom: 0;
   min-height: calc(90vh - 150px);
 }
+.project-details {
+  /* [추가] fixed된 왼쪽 영역(300px) + 갭(4rem) 만큼 마진 */
+  margin-left: calc(300px + 4rem);
+}
 
 
 .detail-content {
@@ -330,18 +370,30 @@ onUnmounted(() => {
   margin-left: auto;
   margin-right: auto;
 }
-
+/* [추가] 1400px 이하 ~ 993px 이상일 때 */
+@media (max-width: 1400px) and (min-width: 993px) {
+  .project-titles {
+    /* 화면이 1400px보다 좁아지면
+       (100vw - 100vw)/2 + 2rem = 2rem 이 됨 */
+    left: 2rem;
+  }
+}
 /* 반응형 스타일 */
 @media (max-width: 992px) {
   .main-content-area {
-    grid-template-columns: 1fr; /* 모바일에서는 세로로 쌓임 */
-    gap: 2rem;
+    padding: 4rem 2rem;
   }
   .project-titles {
     position: static; /* sticky 해제 */
     margin-bottom: 3rem;
     padding-bottom: 0;
     text-align: center; /* 모바일에선 중앙 정렬 */
+    transform: none;
+    width: auto;
+    left: auto;
+  }
+  .project-details {
+    margin-left: 0;
   }
   .project-titles ul {
     max-height: none;
