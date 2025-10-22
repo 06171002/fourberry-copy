@@ -38,10 +38,10 @@ const selectYear = (year: string) => {
 
 <template>
   <div class="about-page">
-    <section class="hero-section">
-      <h2>사람 중심의 IT, 더 나은 가치를 만듭니다.</h2>
-      <p>포베리는 IT 분야의 기본을 지키며 고객과 함께 성장합니다.</p>
-    </section>
+    <CommonPageHero
+        title="사람 중심의 IT, 더 나은 가치를 만듭니다."
+        subtitle="포베리는 IT 분야의 기본을 지키며 고객과 함께 성장합니다."
+    />
 
     <div class="page-content">
       <section class="intro-section">
@@ -99,24 +99,6 @@ const selectYear = (year: string) => {
 </template>
 
 <style scoped>
-/* ============== Hero 섹션 스타일 ============== */
-.hero-section {
-  padding: 6rem 2rem;
-  text-align: center;
-  background-color: #f8f9fa;
-}
-
-.hero-content h2 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-
-.hero-content p {
-  font-size: 1.1rem;
-  color: #555;
-}
-
 /* ============== 페이지 콘텐츠 레이아웃 ============== */
 .page-content {
   max-width: 900px;

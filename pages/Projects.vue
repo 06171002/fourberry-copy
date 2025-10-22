@@ -9,17 +9,178 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 const isHeaderHidden = useHeaderVisibility() // 헤더 상태 가져오기
 let headerScrollTrigger: ScrollTrigger | null = null;
+let pinTrigger: ScrollTrigger | null = null;
+let titleFadeTrigger: ScrollTrigger | null = null;
+
+// pages/Projects.vue 의 <script setup> 내부
 
 const projects = ref([
-  // ... 프로젝트 데이터 ...
-  { id: 'cuckoo-oms', title: '쿠쿠 통합 쇼핑몰 관리 (OMS)', description: '78개 영업채널의 주문, 배송, 재고 관리를 위한 차세대 시스템', period: '2021.11 ~ 2022.09 (구축) / 2025.01 ~ 현재 (운영)', image: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDN8fG9yZGVyJTIwbWFuYWdlbWVudHxlbnwwfHx8fDE2NzgwNjQ0MDU&ixlib=rb-4.0.3&q=80&w=1080' },
-  { id: 'cuckoo-pos', title: '쿠쿠 차세대 영업관리 (POS & WEB)', description: '판매, 정산, 재고, 매출, 고객 정보 등 유통 관점의 실시간 데이터 관리 시스템', period: '2019.05 ~ 2019.12 (구축) / 2025.01 ~ 현재 (운영)', image: 'https://images.unsplash.com/photo-1587691592099-f4d15f0892de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDEyfHxwb3MlMjBzeXN0ZW18ZW58MHx8fHwxNjc4MDY0NDYx&ixlib=rb-4.0.3&q=80&w=1080' },
-  { id: 'nonghyup-mall', title: '영등포농협 브랜드 쇼핑몰', description: '하이브리드 모바일 쇼핑몰, 관리자 사이트, 관리자 앱 시스템 (Always withFresh)', period: '2024.01 ~ 2025.03 (구축) / 2025.04 ~ 현재 (운영)', image: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDF8fGdyb2NlcnklMjBzdG9yZXxlbnwwfHx8fDE2NzgwNjQ1MDI&ixlib=rb-4.0.3&q=80&w=1080' },
-  { id: 'nonghyup-sso', title: '영등포농협 SSO 시스템', description: '온라인몰 포함 3개 사이트 통합 회원 관리를 위한 SSO 시스템 (소셜 인증 포함)', period: '2024.08 ~ 2024.12 (구축)', image: 'https://images.unsplash.com/photo-1554629947-334ff61d85dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDEwfHxsYW5kc2NhcGV8ZW58MHx8fHwxNjc4MDY0NTMw&ixlib.rb-4.0.3&q=80&w=1080' },
-  { id: 'dhlottery', title: '동행복권 인쇄복권 DB 전환', description: '이원화된 시스템 통합 및 안정성 확보를 위한 DB 전환 (MySql to Oracle)', period: '2024.10 ~ 현재 (2025년 10월 전환 예정)', image: 'https://images.unsplash.com/photo-1518186285587-e21e49e921d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDJ8fGxvYWR8ZW58MHx8fHwxNjc4MDY0NTYy&ixlib=rb-4.0.3&q=80&w=1080' },
-  { id: 'autocrypt', title: '아우토크립트 K-CSMS', description: '자동차 보안 취약점 정보 제공 커뮤니티 사이트', period: '1차: 2024.06 ~ 2024.10 / 2차: 2025.06 ~ 2025.09 (구축)', image: 'https://images.unsplash.com/photo-1487058792275-054922ca9c5e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDV8fHNlY3VyaXR5fGVufDB8fHx8MTY3ODA2NDU5MQ&ixlib=rb-4.0.3&q=80&w=1080' },
-  { id: 'hyundai', title: '현대자동차 차량출입관제', description: '실시간 차량 출입 집계 및 관리를 통한 작업자 안전 및 보안 관리 향상', period: '2020.07 ~ 2020.10 (구축)', image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDEwfHxjYXJ8ZW58MHx8fHwxNjc4MDY0NjIx&ixlib=rb-4.0.3&q=80&w=1080' },
-  { id: 'etas', title: 'eTAS 운행기록분석시스템', description: '노후 장비 교체, 실시간 DTG 수집체계 구축 및 정보 컨설팅', period: '2020.06 ~ 2020.12 (구축)', image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDF8fGJ1c3xlbnwwfHx8fDE2NzgwNjQ2NDk&ixlib=rb-4.0.3&q=80&w=1080' },
+  {
+    id: 'cuckoo-oms',
+    title: '쿠쿠 통합 쇼핑몰 관리 (OMS)',
+    description: '78개 영업채널의 주문, 배송, 재고 관리를 위한 차세대 시스템',
+    period: '2021.11 ~ 2022.09 (구축) / 2025.01 ~ 현재 (운영)',
+    image: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDN8fG9yZGVyJTIwbWFuYWdlbWVudHxlbnwwfHx8fDE2NzgwNjQ0MDU&ixlib=rb-4.0.3&q=80&w=1080',
+    keywords: ['78개 채널', '주문/배송/재고 통합', 'SCM 시스템'], // [추가]
+    details: [ // [추가]
+      '기존 수작업 위주의 SCM 업무 및 3rd party 업체의 E-MAIL/EXCEL 위주 업무 처리 방식 개선 요구 [cite: 160]',
+      '유통사별 SCM 업무 일원화 및 단순/반복 업무 자동화를 통한 인력/시간 절감 목표 [cite: 160]',
+      'API 연동, RPA PC 도입 등 개선 방향 적용 [cite: 160]',
+      '차세대 SCM 시스템과 영업 시스템 간의 연관성 검토 및 시너지 효과 분석 [cite: 160]',
+    ],
+    detailImages: [ // [추가] - 실제 이미지 URL 또는 경로로 변경 필요
+      '[포베리]회사소개서_20250930.pptx 페이지 12의 추진 배경 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 12의 업무처리 프로세스 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 13의 개선방향 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 13의 업무 연관성 이미지',
+    ]
+  },
+  {
+    id: 'cuckoo-pos',
+    title: '쿠쿠 차세대 영업관리 (POS & WEB)',
+    description: '판매, 정산, 재고, 매출, 고객 정보 등 유통 관점의 실시간 데이터 관리 시스템',
+    period: '2019.05 ~ 2019.12 (구축) / 2025.01 ~ 현재 (운영)',
+    image: 'https://images.unsplash.com/photo-1587691592099-f4d15f0892de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDEyfHxwb3MlMjBzeXN0ZW18ZW58MHx8fHwxNjc4MDY0NDYx&ixlib=rb-4.0.3&q=80&w=1080',
+    keywords: ['실시간 데이터 관리', 'POS & WEB', '판매/정산/재고'], // [추가]
+    details: [ // [추가]
+      '업무 중심의 판매 관리 시스템(POS & WEB) 도입 [cite: 168]',
+      '정산 관리, 재고 및 매출 관리, 영업 분석 기능 제공 [cite: 168]',
+      '판매 고객 정보 관리 등 유통 관점의 실시간 판매 데이터 관리에 최적화된 시스템 구축 [cite: 168]',
+    ],
+    detailImages: [ // [추가]
+      '[포베리]회사소개서_20250930.pptx 페이지 14의 시스템 화면 이미지'
+    ]
+  },
+  {
+    id: 'nonghyup-mall',
+    title: '영등포농협 브랜드 쇼핑몰',
+    description: '하이브리드 모바일 쇼핑몰, 관리자 사이트, 관리자 앱 시스템 (Always withFresh)',
+    period: '2024.01 ~ 2025.03 (구축) / 2025.04 ~ 현재 (운영)',
+    image: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDF8fGdyb2NlcnklMjBzdG9yZXxlbnwwfHx8fDE2NzgwNjQ1MDI&ixlib=rb-4.0.3&q=80&w=1080',
+    keywords: ['Hybrid 모바일 쇼핑몰', 'Always withFresh', '관리자 앱 포함'], // [추가]
+    details: [ // [추가]
+      '영등포농협 자체 브랜드몰 "Always withFresh" 구축 [cite: 143]',
+      'Hybrid 모바일 앱 형태의 온라인 쇼핑몰 개발 [cite: 144]',
+      '상품, 전시, 컨텐츠(CMS), 프로모션(행사, 쿠폰), 통계 등 100여 건의 관리자 메뉴 개발 [cite: 145]',
+    ],
+    detailImages: [ // [추가]
+      '[포베리]회사소개서_20250930.pptx 페이지 11의 모바일 화면 (메인) 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 11의 모바일 화면 (카테고리) 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 11의 모바일 화면 (상품목록) 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 11의 모바일 화면 (상품상세) 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 11의 모바일 화면 (팝업) 이미지',
+    ]
+  },
+  {
+    id: 'nonghyup-sso',
+    title: '영등포농협 SSO 시스템',
+    description: '온라인몰 포함 3개 사이트 통합 회원 관리를 위한 SSO 시스템 (소셜 인증 포함)',
+    period: '2024.08 ~ 2024.12 (구축)',
+    image: 'https://images.unsplash.com/photo-1554629947-334ff61d85dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDEwfHxsYW5kc2NhcGV8ZW58MHx8fHwxNjc4MDY0NTMw&ixlib.rb-4.0.3&q=80&w=1080',
+    keywords: ['SSO', '3개 사이트 통합', '소셜 인증'], // [추가]
+    details: [ // [추가]
+      '영등포농협 관리 사이트 2개 및 신규 브랜드 온라인몰의 통합 회원 관리 시스템 구축 [cite: 203]',
+      '휴대폰 번호 및 다양한 소셜(카카오, 네이버, 애플 등) 인증을 통한 가입 및 로그인 기능 제공 [cite: 203]',
+      '사이트별 약관 동의 관리 및 통합 계정 관리 기능 구현 [cite: 204]',
+    ],
+    detailImages: [ // [추가]
+      '[포베리]회사소개서_20250930.pptx 페이지 17의 로그인 선택 화면 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 17의 소셜 로그인 화면 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 17의 내정보관리 화면 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 17의 약관동의 화면 이미지',
+    ]
+  },
+  {
+    id: 'dhlottery',
+    title: '동행복권 인쇄복권 DB 전환',
+    description: '이원화된 시스템 통합 및 안정성 확보를 위한 DB 전환 (MySql to Oracle)',
+    period: '2024.10 ~ 현재 (2025년 10월 전환 예정)',
+    image: 'https://images.unsplash.com/photo-1518186285587-e21e49e921d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDJ8fGxvYWR8ZW58MHx8fHwxNjc4MDY0NTYy&ixlib=rb-4.0.3&q=80&w=1080',
+    keywords: ['DB 전환 (MySQL→Oracle)', '시스템 통합', '약 50억 건 이관'], // [추가]
+    details: [ // [추가]
+      '이원화된 인쇄복권 시스템(PTMS/PLMS) 통합 [cite: 128]',
+      '시스템 안정성 확보를 위한 데이터베이스 전환 (MySQL to Oracle) [cite: 128, 129]',
+      '약 200여 개 시스템 메뉴 변환 작업 포함 [cite: 128]',
+      '전체 데이터 약 50억 건에 대한 데이터 변환 및 이관 수행 [cite: 129]',
+      '현황 분석, 개발 표준 및 ETL 구축, 전환 계획 수립 및 리허설, 시스템 전환 및 안정화 단계로 진행 [cite: 132, 133, 134, 135]',
+    ],
+    detailImages: [ // [추가]
+      '[포베리]회사소개서_20250930.pptx 페이지 10의 데이터 전환 분석 표 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 10의 개발 표준 목차 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 10의 ETL 도구 이미지',
+    ]
+  },
+  {
+    id: 'autocrypt',
+    title: '아우토크립트 K-CSMS',
+    description: '자동차 보안 취약점 정보 제공 커뮤니티 사이트',
+    period: '1차: 2024.06 ~ 2024.10 / 2차: 2025.06 ~ 2025.09 (구축)',
+    image: 'https://images.unsplash.com/photo-1487058792275-054922ca9c5e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDV8fHNlY3VyaXR5fGVufDB8fHx8MTY3ODA2NDU5MQ&ixlib=rb-4.0.3&q=80&w=1080',
+    keywords: ['K-CSMS', '자동차 보안', '취약점 정보 커뮤니티'], // [추가]
+    details: [ // [추가]
+      '자동차 IT 보안 취약점 정보 제공 및 공유를 위한 커뮤니티 사이트 구축 [cite: 179]',
+      '벤더, 제품, 플랫폼별 취약점 현황 통계 대시보드 제공 [cite: 182]',
+      '코드 기반 SW 자동 점검 및 CVE/CWE 분석, CVSS 위험도 시각화 기능 구현 [cite: 182]',
+    ],
+    detailImages: [ // [추가]
+      '[포베리]회사소개서_20250930.pptx 페이지 15의 대시보드 화면 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 15의 통계 화면 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 15의 파일 업로드 화면 이미지',
+    ]
+  },
+  {
+    id: 'kobc-game', // ID 변경: hyundai -> kobc-game
+    title: '한국해양공사 매연 저감 캠페인',
+    description: '선박 매연 저감 주제의 게이미피케이션 캠페인 시스템 (부루마블 형식)',
+    period: '2024.10 ~ 2025.01 (구축)',
+    image: 'https://images.unsplash.com/photo-1487058792275-054922ca9c5e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDV8fHNlY3VyaXR5fGVufDB8fHx8MTY3ODA2NDU5MQ&ixlib=rb-4.0.3&q=80&w=1080', // 이미지 변경
+    keywords: ['게이미피케이션', '부루마블', '매연 저감 캠페인', 'PC/모바일 최적화'], // [추가]
+    details: [ // [추가]
+      '선박 매연 저감 캠페인을 부루마블 게임 형식과 접목 [cite: 190]',
+      '각 항구별 매연 수치를 최소화하며 완주하는 게임 방식 [cite: 190]',
+      'PC와 모바일 환경 모두 지원하며, 저사양 모바일 기기에서도 원활히 구동되도록 최적화 진행 [cite: 191]',
+      '구축 완료 후 1차, 2차 캠페인 진행 지원 [cite: 193]',
+    ],
+    detailImages: [ // [추가]
+      '[포베리]회사소개서_20250930.pptx 페이지 16의 PC 게임 화면 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 16의 모바일 게임 화면 이미지',
+    ]
+  },
+  {
+    id: 'hyundai',
+    title: '현대자동차 차량출입관제',
+    description: '실시간 차량 출입 집계 및 관리를 통한 작업자 안전 및 보안 관리 향상',
+    period: '2020.07 ~ 2020.10 (구축)',
+    image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDEwfHxjYXJ8ZW58MHx8fHwxNjc4MDY0NjIx&ixlib=rb-4.0.3&q=80&w=1080',
+    keywords: ['차량 출입 관제', 'Kiosk/WEB 시스템', '안전/보안 강화'], // [추가]
+    details: [ // [추가]
+      'Kiosk 도입 및 WEB 시스템을 통해 출입 명부 및 출입 차량의 실시간 전산 관리 [cite: 274, 278]',
+      '출입자의 신속한 사업장 출입 지원 [cite: 275]',
+      '실시간 출입 명부 관리를 통해 작업자 안전 및 보안 체계 관리 향상 [cite: 276]',
+      '차량 5부제 안내, 방문 차량 환영 메시지, 차량 인식 및 등록/미등록 정보 표시 등 기능 구현 [cite: 278]',
+    ],
+    detailImages: [ // [추가]
+      '[포베리]회사소개서_20250930.pptx 페이지 20의 Kiosk 화면 예시 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 20의 화면 구성 설명 이미지',
+    ]
+  },
+  {
+    id: 'etas',
+    title: 'eTAS 운행기록분석시스템',
+    description: '노후 장비 교체, 실시간 DTG 수집체계 구축 및 정보 컨설팅',
+    period: '2020.06 ~ 2020.12 (구축)',
+    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDF8fGJ1c3xlbnwwfHx8fDE2NzgwNjQ2NDk&ixlib=rb-4.0.3&q=80&w=1080',
+    keywords: ['DTG 분석 시스템', '실시간 수집', '정보 컨설팅'], // [추가]
+    details: [ // [추가]
+      '운행기록분석시스템(eTAS)의 노후 장비 교체 및 안정적 인프라 구성 [cite: 286]',
+      '모바일 DTG 확산을 위한 실시간 DTG(운행기록장치) 수집 체계 구축 [cite: 287]',
+      '시스템의 효율적 운영과 장기적 발전 계획 수립을 위한 정보 컨설팅 수행 [cite: 288]',
+    ],
+    detailImages: [ // [추가]
+      '[포베리]회사소개서_20250930.pptx 페이지 21의 시스템 구성도 이미지',
+      '[포베리]회사소개서_20250930.pptx 페이지 21의 데이터 수집 방식 이미지',
+    ]
+  },
 ]);
 const activeProjectId = ref(projects.value[0]?.id || '')
 let triggers: ScrollTrigger[] = [];
@@ -44,15 +205,51 @@ const scrollToProject = (projectId: string) => {
 
 onMounted(async () => {
   await nextTick();
-  const sections = gsap.utils.toArray('.project-detail-section');
+  const titlesElement = document.querySelector('.project-titles');
+  // const detailsElement = document.querySelector('.project-details');
+  const mainContentElement = document.querySelector('.main-content-area');
+  const sections = gsap.utils.toArray<HTMLElement>('.project-detail-section');
+
+  // --- ❗ Pinning ScrollTrigger 추가 ---
+  // if (titlesElement && detailsElement) {
+  //   pinTrigger = ScrollTrigger.create({
+  //     trigger: detailsElement, // 스크롤 길이는 details 영역 기준
+  //     pin: titlesElement,      // 고정할 요소는 titles 영역
+  //     start: 'top 200px',     // details 상단이 헤더 아래(100px)에 닿을 때 고정 시작
+  //     end: () => `+=${detailsElement.scrollHeight - window.innerHeight + 100}`, // details 영역 전체 스크롤 + 여유 공간 만큼 고정
+  //     // markers: true, // 디버깅용
+  //     pinSpacing: false // Pin된 요소 아래 간격 자동 추가 안함 (grid gap 사용)
+  //   });
+  // }
+
+  if (titlesElement && mainContentElement) {
+    // GSAP 애니메이션 생성 (초기에는 실행 X)
+    const titleAnimation = gsap.to(titlesElement, {
+      opacity: 1,
+      visibility: 'visible',
+      transform: 'translateX(0)',
+      duration: 0.5,
+      ease: 'power2.out',
+      paused: true // 스크롤 트리거가 제어하도록 paused 설정
+    });
+
+    // 스크롤 트리거 생성
+    titleFadeTrigger = ScrollTrigger.create({
+      trigger: mainContentElement, // .main-content-area를 기준으로
+      start: 'top 300px', // main-content-area 상단이 뷰포트 상단에서 300px 지점에 닿을 때
+      end: 'bottom center',
+      toggleActions: 'play reverse play reverse',
+      animation: titleAnimation, // 위에서 만든 애니메이션 연결
+      // markers: true, // 디버깅용
+    });
+  }
 
   sections.forEach((section) => {
-    const el = section as HTMLElement;
-    const projectId = el.dataset.projectId;
+    const projectId = section.dataset.projectId;
 
     if (projectId) {
       const trigger = ScrollTrigger.create({
-        trigger: el,
+        trigger: section,
         start: 'top center+=50',
         end: 'bottom center-=50',
         // markers: true,
@@ -62,13 +259,13 @@ onMounted(async () => {
       triggers.push(trigger);
     }
 
-    gsap.from(el.querySelector('.detail-content'), {
+    gsap.from(section.querySelector('.detail-content'), {
       opacity: 0,
       y: 50,
       duration: 0.6,
       ease: 'power2.out',
       scrollTrigger: {
-        trigger: el,
+        trigger: section,
         start: 'top 80%',
         toggleActions: 'play none none reverse',
       }
@@ -101,21 +298,27 @@ onMounted(async () => {
 onUnmounted(() => {
   triggers.forEach(trigger => trigger.kill());
   headerScrollTrigger?.kill();
+  titleFadeTrigger?.kill();
+  // pinTrigger?.kill();
 });
 </script>
 
 <template>
   <div class="projects-page">
-    <section class="intro-section">
-      <h1>SI / SM Projects</h1>
-      <p>포베리가 성공적으로 수행한 시스템 통합 및 유지보수 프로젝트들입니다.</p>
-    </section>
+    <CommonPageHero
+        title="SI / SM Projects"
+        subtitle="포베리가 성공적으로 수행한 시스템 통합 및 유지보수 프로젝트들입니다."
+        background-image-url="https://images.unsplash.com/photo-1531297484001-80022131f5a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920"
+    />
 
     <div class="main-content-area">
       <aside class="project-titles">
         <Transition name="fade-up" mode="out-in">
           <div :key="activeProject?.id" class="active-title-wrapper">
             <h3 v-if="activeProject">{{ activeProject.title }}</h3>
+            <ul v-if="activeProject?.keywords" class="active-project-keywords">
+              <li v-for="keyword in activeProject.keywords" :key="keyword">{{ keyword }}</li>
+            </ul>
           </div>
         </Transition>
         <ul style="display: none;">
@@ -140,6 +343,12 @@ onUnmounted(() => {
             <p>{{ project.description }}</p>
             <span class="period">{{ project.period }}</span>
             <img :src="project.image" :alt="`${project.title} image`" loading="lazy">
+            <div v-if="project.details && project.details.length > 0" class="project-extra-details">
+              <h4>주요 내용</h4>
+              <ul>
+                <li v-for="(detail, index) in project.details" :key="index">{{ detail }}</li>
+              </ul>
+            </div>
           </div>
         </section>
       </main>
@@ -155,45 +364,6 @@ onUnmounted(() => {
 <style scoped>
 .projects-page {
   background-color: #ffffff;
-  color: #333;
-}
-
-.intro-section {
-  /* [수정] 최소 높이를 화면 전체 높이로 변경 */
-  min-height: 100vh;
-  padding: 6rem 2rem;
-  text-align: center;
-
-  /* [추가] Flexbox를 사용해 텍스트 콘텐츠를 수직/수평 중앙 정렬 */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  /* [추가] 배경 이미지 및 어두운 오버레이 */
-  background-image:
-    /* 1. 어두운 오버레이 (가독성을 위해 60% 불투명도 검은색) */
-      linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-        /* 2. 추천 이미지 URL (추상적인 기술/네트워크) */
-      url('https://images.unsplash.com/photo-1531297484001-80022131f5a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920');
-
-  background-color: #222; /* 이미지 로딩 전 배경색 */
-  background-size: cover; /* 화면에 꽉 차게 */
-  background-position: center center; /* 중앙 정렬 */
-  background-attachment: fixed; /* 스크롤 시 고정되는 패럴랙스 효과 */
-}
-
-/* [수정] 어두운 배경에 맞춰 h1 텍스트 색상 변경 */
-.intro-section h1 {
-  font-size: 2.8rem;
-  margin-bottom: 0.5rem;
-  color: #ffffff; /* 흰색 */
-}
-
-/* [수정] 어두운 배경에 맞춰 p 텍스트 색상 변경 */
-.intro-section p {
-  font-size: 1.1rem;
-  color: #f0f0f0; /* 밝은 회색 */
 }
 
 .outro-section {
@@ -234,49 +404,48 @@ onUnmounted(() => {
 
 /* (선택 사항) 제목 래퍼 높이 고정하여 레이아웃 밀림 방지 */
 .active-title-wrapper {
-  min-height: 50px; /* 제목 폰트 크기 및 줄 수에 맞게 조절 */
   display: flex;
-  align-items: center; /* 세로 중앙 정렬 (선택 사항) */
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 /* --- 메인 콘텐츠 영역 --- */
 .main-content-area {
   display: grid;
-  max-width: 1400px; /* 전체 최대 너비 */
-  margin: 0 auto;
-  padding: 4rem 2rem;
+  /* 왼쪽 컬럼 너비 고정, 오른쪽은 나머지 공간 차지 */
+  grid-template-columns: 300px 1fr;
+  gap: 5rem; /* 컬럼 사이 간격 */
+  max-width: 1400px;
+  margin: 4rem auto;
+  padding: 0 2rem;
+  align-items: start; /* 중요: 컬럼들이 위쪽 정렬되도록 */
 }
 
 /* --- 왼쪽 제목 목록 --- */
 .project-titles {
   position: sticky;
-  top: 50vh;
-  transform: translateY(-50%);
+  top: 250px;
   z-index: 10;
   /* overflow 제거 */
   text-align: left; /* 텍스트 왼쪽 정렬 */
   padding: 1rem 0; /* 상하 여백 */
   height: fit-content; /* 내용 높이에 맞춤 */
-  align-self: start; /* Grid 아이템을 시작점에 정렬 (매우 중요) */
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-30px);
 }
 
 .project-titles h3 {
-  font-size: 1.8rem; /* 제목 크기 키움 */
+  font-size: 3rem; /* 제목 크기 키움 */
   font-weight: 700;
   color: #007aff; /* 활성 색상 */
-  margin: 0; /* 기본 마진 제거 */
-  line-height: 1.4;
 }
 
 .project-titles ul {
   list-style: none;
   padding: 0;
   margin: 0;
-  max-height: 100%; /* 부모 높이만큼 */
-  overflow-y: auto; /* 세로 스크롤 활성화 */
-  /* 스크롤바 디자인 (선택 사항) */
-  scrollbar-width: thin;
-  scrollbar-color: #007aff #f8f9fa;
 }
 /* Webkit 브라우저 스크롤바 */
 .project-titles ul::-webkit-scrollbar {
@@ -291,9 +460,6 @@ onUnmounted(() => {
   border-radius: 3px;
 }
 
-.project-titles li {
-  margin-bottom: 0; /* 아래쪽 마진 제거 */
-}
 
 .project-titles a {
   text-decoration: none;
@@ -317,22 +483,77 @@ onUnmounted(() => {
   background-color: #f8f9fa; /* 호버 배경색 */
 }
 
-/* --- 오른쪽 상세 내용 --- */
-.project-detail-section {
-  min-height: 90vh; /* 높이를 조금 더 늘려 겹침 방지 */
-  margin-bottom: 5rem; /* 간격 살짝 줄임 */
-  padding-top: 150px; /* 상단 여백 조금 더 확보 */
-  box-sizing: border-box;
+.active-project-keywords {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+  color: #777;
 }
-.project-detail-section:last-child {
-  margin-bottom: 0;
-  min-height: calc(90vh - 150px);
-}
-.project-details {
-  /* [추가] fixed된 왼쪽 영역(300px) + 갭(4rem) 만큼 마진 */
-  margin-left: calc(300px + 4rem);
+.active-project-keywords li {
+  display: inline-block; /* 가로 배치 */
+  margin-right: 0.5rem;
+  margin-bottom: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  background-color: #f0f0f0; /* 배경색 */
+  border-radius: 4px; /* 둥근 모서리 */
 }
 
+/* --- 오른쪽 상세 내용 --- */
+.project-detail-section {
+  padding-top: 5rem;    /* ✨ 내부 상단 여백 추가 (sticky top 값 등 고려) */
+  padding-bottom: 5rem; /* ✨ 내부 하단 여백 추가 */
+  margin-bottom: 5rem;  /* ✨ 섹션 간 간격 */
+  box-sizing: border-box;
+}
+.project-details {
+  /* margin-left 제거 */
+  padding-bottom: 10vh; /* ✨ 마지막 섹션 스크롤 공간 확보 (값 조절 필요) */
+}
+
+.project-extra-details {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee; /* 구분선 */
+  text-align: left; /* 상세 내용은 왼쪽 정렬 */
+}
+
+.project-extra-details h4 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.project-extra-details ul {
+  list-style: disc; /* 기본 불릿 리스트 */
+  padding-left: 1.5rem; /* 들여쓰기 */
+  margin: 0;
+}
+
+.project-extra-details li {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #555;
+  margin-bottom: 0.8rem;
+}
+
+
+.project-detail-images h4 {
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+  text-align: left; /* 제목 왼쪽 정렬 */
+}
+
+
+.image-gallery img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  object-fit: cover; /* 이미지 비율 유지하며 채우기 */
+  margin-top: 0; /* 기존 img 스타일 덮어쓰기 */
+}
 
 .detail-content {
   /* 내용 스타일 */
@@ -369,6 +590,8 @@ onUnmounted(() => {
   margin-left: auto;
   margin-right: auto;
 }
+
+
 /* [추가] 1400px 이하 ~ 993px 이상일 때 */
 @media (max-width: 1400px) and (min-width: 993px) {
   .project-titles {
