@@ -5,6 +5,11 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Observer } from 'gsap/Observer'
 
+import bgImage1 from '../assets/image/1.jpg'
+import bgImage2 from '../assets/image/2.jpg'
+import bgImage3 from '../assets/image/3.jpg'
+import bgImage4 from '../assets/image/4.jpg'
+
 // 페이지 메타 정의: home 레이아웃 사용
 definePageMeta({
   layout: 'home',
@@ -205,7 +210,9 @@ onUnmounted(() => {
         :is-home="true"
     />
 
-    <BaseSection class="panel h-dvh bg-white text-black"> <div class="text-center h-full flex flex-col justify-center">
+    <BaseSection
+        class="panel h-dvh" :background-image-url="bgImage1"
+        text-color="#ffffff" > <div class="text-center h-full flex flex-col justify-center">
       <h2 class="text-5xl md:text-7xl font-extrabold mb-6 text-gray-900 section-title">ABOUT US</h2>
       <p class="text-lg md:text-xl text-gray-700 mb-12 md:mb-16 leading-relaxed section-description">
         포베리는 사람 중심의 IT 기술 발전을 위해
@@ -232,7 +239,9 @@ onUnmounted(() => {
     </div>
     </BaseSection>
 
-    <BaseSection class="panel h-dvh bg-black text-white"> <div class="text-center h-full flex flex-col justify-center">
+    <BaseSection
+        class="panel h-dvh" :background-image-url="bgImage2"
+        text-color="#ffffff" > <div class="text-center h-full flex flex-col justify-center">
       <h2 class="text-5xl md:text-7xl font-extrabold mb-6 section-title">시스템 통합 및 유지보수 (SI/SM)</h2>
       <p class="text-lg md:text-xl text-gray-300 mb-10 md:mb-12 leading-relaxed section-description large">
         다년간 축적된 경험과 기술력을 바탕으로 고객의 비즈니스 환경에 최적화된 시스템을
@@ -242,7 +251,9 @@ onUnmounted(() => {
     </div>
     </BaseSection>
 
-    <BaseSection class="panel h-dvh bg-white text-black"> <div class="text-center h-full flex flex-col justify-center">
+    <BaseSection
+        class="panel h-dvh" :background-image-url="bgImage3"
+        text-color="#ffffff" > <div class="text-center h-full flex flex-col justify-center">
       <h2 class="text-5xl md:text-7xl font-extrabold mb-6 section-title">자체 개발 솔루션</h2>
       <p class="text-lg md:text-xl text-gray-700 mb-10 md:mb-12 leading-relaxed section-description large">
         고객의 비즈니스에 새로운 가치를 더하는 포베리만의 기술력을 만나보세요.
@@ -259,7 +270,9 @@ onUnmounted(() => {
     </div>
     </BaseSection>
 
-    <BaseSection class="panel h-dvh bg-black text-white flex items-center"> <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center cta-section">
+    <BaseSection
+        class="panel h-dvh" :background-image-url="bgImage4"
+        text-color="#ffffff" > <div class="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-center cta-section">
       <div class="strengths text-left"> <h3 class="text-3xl md:text-4xl font-bold mb-6">FOURBERRY STRENGTHS</h3>
         <ul class="space-y-4">
           <li>
