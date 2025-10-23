@@ -43,33 +43,32 @@ import { ref, onMounted, computed, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { useHeaderVisibility } from '~/composables/useHeaderState'
+// import { useHeaderVisibility } from '~/composables/useHeaderState' // 더 이상 사용하지 않음
 
 gsap.registerPlugin(ScrollTrigger)
 
-// --- 기존 상태 로직 ---
+// --- 상태 로직 ---
 const isScrolled = ref(false)
 const route = useRoute()
-const isHeaderHidden = useHeaderVisibility() // useHeaderState()의 반환값
+// const isHeaderHidden = useHeaderVisibility() // 더 이상 사용하지 않음
 const isHomePage = computed(() => route.path === '/')
-// [핵심] 스크롤되었거나, 홈이 아니면 true
+// 스크롤되었거나, 홈이 아니면 true (스타일 변경 기준)
 const shouldApplyScrolledClass = computed(() => isScrolled.value || !isHomePage.value)
 let scrollTriggerInstance: ScrollTrigger | null = null;
 
-// --- ❗ NEW: 모바일 메뉴 로직 ---
+// --- 모바일 메뉴 로직 ---
 const isMobileMenuOpen = ref(false)
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
 }
 
-// --- ❗ NEW: Tailwind 클래스 바인딩 로직 ---
+// --- Tailwind 클래스 바인딩 로직 ---
 
-// 헤더의 동적 클래스를 계산합니다.
+// 헤더의 동적 클래스를 계산합니다. (숨김 관련 translate 제거)
 const headerClasses = computed(() => [
   'top-0', 'left-0', 'w-full', 'z-50',
-  'transition-all', 'duration-300', 'ease-in-out',
-  // 스크롤 시 숨김/표시
-  isHeaderHidden.value ? '-translate-y-full' : 'translate-y-0',
+  'transition-all', 'duration-300', 'ease-in-out', // transform 관련 transition 제거
+  // isHeaderHidden.value ? '-translate-y-full' : 'translate-y-0', // 숨김/표시 로직 제거
 
   // 'scrolled' 상태 (흰색 배경) 또는 'initial' 상태 (투명 배경)
   shouldApplyScrolledClass.value
@@ -77,16 +76,16 @@ const headerClasses = computed(() => [
       : 'absolute bg-transparent border-b border-white/20 text-white' // 초기 상태
 ]);
 
-// 모바일 햄버거 버튼의 포커스 링 색상을 동적으로 계산합니다.
+// 모바일 햄버거 버튼 클래스 (변경 없음)
 const hamburgerButtonClasses = computed(() => [
   'p-2', 'rounded-md', 'focus:outline-none', 'focus:ring-2', 'focus:ring-inset',
   shouldApplyScrolledClass.value ? 'focus:ring-gray-800' : 'focus:ring-white'
 ]);
 
 
-// --- 기존 생명주기 로직 (수정됨) ---
+// --- 생명주기 로직 ---
 onMounted(() => {
-  // 메인 페이지에서만 스크롤 트리거 생성
+  // 메인 페이지에서만 스크롤 상태 감지 트리거 생성
   if (isHomePage.value) {
     scrollTriggerInstance = ScrollTrigger.create({
       trigger: 'body',
@@ -96,17 +95,20 @@ onMounted(() => {
         isScrolled.value = self.scroll() > 10;
       },
     });
+    // 초기 로드 시 스크롤 상태 확인
+    isScrolled.value = window.scrollY > 10;
   } else {
+    // 메인 페이지가 아니면 기본적으로 스크롤된 상태(흰색 배경)로 시작
     isScrolled.value = true;
   }
 
   // 라우트 변경 감지
   watch(() => route.path, (newPath) => {
-    // ❗ 페이지 이동 시 헤더 표시 및 모바일 메뉴 닫기
-    isHeaderHidden.value = false;
-    isMobileMenuOpen.value = false;
+    // isHeaderHidden.value = false; // 헤더 표시 상태 관리 제거
+    isMobileMenuOpen.value = false; // 페이지 이동 시 모바일 메뉴 닫기
 
     if (newPath === '/') {
+      // 메인 페이지로 오면 현재 스크롤 위치 반영 및 트리거 (재)활성화
       isScrolled.value = window.scrollY > 10;
       if (!scrollTriggerInstance) {
         scrollTriggerInstance = ScrollTrigger.create({
@@ -121,6 +123,7 @@ onMounted(() => {
         scrollTriggerInstance.enable();
       }
     } else {
+      // 다른 페이지로 가면 항상 스크롤된 상태(흰색 배경)로 설정하고 트리거 비활성화
       isScrolled.value = true;
       scrollTriggerInstance?.disable();
     }
@@ -134,7 +137,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 모바일 메뉴 드롭다운 트랜지션 */
+/* 모바일 메뉴 드롭다운 트랜지션 (변경 없음) */
 .slide-down-enter-active,
 .slide-down-leave-active {
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
@@ -149,4 +152,7 @@ onUnmounted(() => {
   transform: translateY(0);
   opacity: 1;
 }
+
+/* Tailwind 클래스로 스타일을 관리하므로 추가적인 CSS는 거의 필요 없을 수 있습니다. */
+/* 필요한 경우 여기에 추가 스타일을 정의하세요. */
 </style>
