@@ -22,7 +22,6 @@ onMounted(() => {
 
   // --- 1. Hero 섹션 초기 로드 애니메이션 (기존 코드 유지) ---
   gsap.set('.home-hero h1, .home-hero .hero-subtitle', { autoAlpha: 0, y: 40 });
-  gsap.set('.header', { autoAlpha: 0 });
 
   heroTl = gsap.timeline(); // ❗ 변수에 할당
 
@@ -49,10 +48,6 @@ onMounted(() => {
         color: '#ffffff',
         ease: 'power2.inOut'
       }, "-=2.5")
-      .to('.header', {
-        duration: 1.0,
-        autoAlpha: 1,
-      }, "-=1.5");
 
 
   // ❗❗❗ [수정] --- 2. Observer 방식 섹션 전환 로직 --- ❗❗❗
@@ -169,7 +164,7 @@ onUnmounted(() => {
   gsap.set(panels, { clearProps: 'position,top,left,width,height,yPercent,autoAlpha' });
 
   // ❗ 내부 콘텐츠 스타일도 초기화 (필요시)
-  const contentSelectors = '.home-hero h1, .home-hero .hero-subtitle, .header, h2, .section-description, .area-card, .card, .details-button, .contact-button';
+  const contentSelectors = '.home-hero h1, .home-hero .hero-subtitle, h2, .section-description, .area-card, .card, .details-button, .contact-button';
   gsap.set(contentSelectors, { clearProps: 'autoAlpha,y,clipPath,opacity,color' });
 });
 </script>
@@ -184,8 +179,8 @@ onUnmounted(() => {
         :is-home="true"
     />
 
-    <section class="panel h-dvh py-12 px-4 md:py-24 md:px-8 bg-white">
-      <div class="max-w-[1100px] mx-auto px-4 md:px-8 text-center h-full flex flex-col justify-center">
+    <BaseSection class="panel h-dvh bg-white">
+      <div class="text-center h-full flex flex-col justify-center">
         <h2 class="text-3xl md:text-4xl font-extrabold mb-4 text-gray-800 overflow-hidden section-title">ABOUT US</h2>
         <p class="text-base md:text-[1.1rem] text-gray-600 mb-8 md:mb-16 leading-6 md:leading-7 section-description">
           포베리는 사람 중심의 IT 기술 발전을 위해
@@ -210,10 +205,10 @@ onUnmounted(() => {
           </div>
         </div>
       </div>
-    </section>
+    </BaseSection>
 
-    <section class="panel h-dvh py-16 md:py-24 px-4 md:px-8 md:flex md:flex-col md:justify-center">
-      <div class="max-w-[1100px] mx-auto px-4 md:px-8 text-center h-full flex flex-col justify-center">
+    <BaseSection class="panel h-dvh md:flex md:flex-col md:justify-center">
+      <div class="text-center h-full flex flex-col justify-center">
         <h2 class="text-3xl md:text-4xl mb-4 overflow-hidden">시스템 통합 및 유지보수 (SI/SM)</h2>
         <p class="text-base md:text-[1.1rem] text-gray-600 mb-8 md:mb-10 section-description large">
           다년간 축적된 경험과 기술력을 바탕으로 고객의 비즈니스 환경에 최적화된 시스템을
@@ -221,10 +216,10 @@ onUnmounted(() => {
         </p>
         <NuxtLink to="/projects" class="inline-block bg-transparent text-blue-600 border border-blue-600 rounded-lg py-2 px-6 md:py-3 md:px-7 no-underline font-semibold transition-all duration-200 ease-in-out hover:bg-blue-600 hover:text-white details-button">자세히 보기</NuxtLink>
       </div>
-    </section>
+    </BaseSection>
 
-    <section class="panel h-dvh bg-gray-50 py-16 md:py-24 px-4 md:px-8 md:flex md:flex-col md:justify-center">
-      <div class="max-w-[1100px] mx-auto px-4 md:px-8 text-center h-full flex flex-col justify-center">
+    <BaseSection class="panel h-dvh bg-gray-50 md:flex md:flex-col md:justify-center">
+      <div class="text-center h-full flex flex-col justify-center">
         <h2 class="text-3xl md:text-4xl mb-4 overflow-hidden">자체 개발 솔루션</h2>
         <p class="text-base md:text-[1.1rem] text-gray-600 mb-8 md:mb-10 section-description large">
           고객의 비즈니스에 새로운 가치를 더하는 포베리만의 기술력을 만나보세요.
@@ -232,23 +227,23 @@ onUnmounted(() => {
         <div class="flex flex-col items-center gap-6 md:gap-8 mb-8 md:mb-10 md:flex-row md:justify-center solution-cards">
           <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg w-full max-w-[300px] card">
             <h3 class="text-lg mb-2">베리패스 (Berry-Pass)</h3>
-            <p class="text-sm">다양한 소셜 인증을 통한 통합 회원 관리(SSO) 솔루션</p>
+            <p class="text-sm">...</p>
           </div>
           <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg w-full max-w-[300px] card">
             <h3 class="text-lg mb-2">베리마인 (Berry-Mine)</h3>
-            <p class="text-sm">웹 정보 자동 수집 및 상호 작용을 위한 웹 자동화 솔루션</p>
+            <p class="text-sm">...</p>
           </div>
         </div>
         <NuxtLink to="/services" class="inline-block bg-transparent text-blue-600 border border-blue-600 rounded-lg py-2 px-6 md:py-3 md:px-7 no-underline font-semibold transition-all duration-200 ease-in-out hover:bg-blue-600 hover:text-white details-button">자세히 보기</NuxtLink>
       </div>
-    </section>
+    </BaseSection>
 
-    <section class="panel h-dvh bg-blue-600 text-white py-16 md:py-24">
-      <div class="max-w-[1100px] mx-auto px-4 md:px-8 text-center h-full flex flex-col justify-center cta-section">
+    <BaseSection class="panel h-dvh bg-blue-600 text-white">
+      <div class="text-center h-full flex flex-col justify-center cta-section">
         <h2 class="text-2xl md:text-[2.2rem] overflow-hidden">포베리와 함께<br class="hidden sm:block" /> 새로운 가치를 만들어보세요.</h2>
         <NuxtLink to="/contact" class="inline-block bg-white text-blue-600 rounded-lg py-3 px-8 md:py-4 md:px-10 no-underline text-base md:text-[1.1rem] font-bold mt-6 transition-transform duration-200 ease-in-out hover:scale-105 contact-button">프로젝트 문의하기</NuxtLink>
       </div>
-    </section>
+    </BaseSection>
   </div>
 </template>
 
